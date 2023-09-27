@@ -1,5 +1,4 @@
 #include "tbitfield.h"
-
 #include <gtest.h>
 
 TEST(TBitField, can_create_bitfield_with_positive_length)
@@ -17,7 +16,6 @@ TEST(TBitField, can_get_length)
 TEST(TBitField, new_bitfield_is_set_to_zero)
 {
   TBitField bf(100);
-
   int sum = 0;
   for (int i = 0; i < bf.GetLength(); i++)
   {
