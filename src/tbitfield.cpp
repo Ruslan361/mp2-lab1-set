@@ -8,10 +8,6 @@
 #include "tbitfield.h"
 #include <string>
 
-// Fake variables used as placeholders in tests
-//static const int FAKE_INT = -1;
-//static TBitField FAKE_BITFIELD(1);
-
 TBitField::TBitField(int len)
 {
     if (len < 0) throw invalid_argument("length of bitfield can not be < 0");
@@ -73,15 +69,17 @@ int TBitField::GetLength(void) const // получить длину (к-во б�
 {
     return BitLen;
 }
-
+//позиция бита в ячейке памяти
+int BitPos(int n) {
+    return n & (sizeof(TELEM) * 8 - 1);
+}
 void TBitField::SetBit(const int n) // установить бит
 {
     if (n < 0) throw invalid_argument("you can not set negative bit");
     if (n >= BitLen) throw invalid_argument("you can not set to much index");
-    TELEM mask = 00000001u;
-    int bit_pos = n & (sizeof(TELEM) * 8 - 1); //%
+    int bit_pos = BitPos(n);
+    TELEM mask = GetMemMask(bit_pos);
     int mem_pos = GetMemIndex(n);
-    mask = mask << bit_pos;
     pMem[mem_pos] = pMem[mem_pos] | mask;
     return;
 }
@@ -90,9 +88,8 @@ void TBitField::ClrBit(const int n) // очистить бит
 {
     if (n < 0) throw invalid_argument("you can not clear negative bit");
     if (n >= BitLen) throw invalid_argument("you can not clear to much index");
-    TELEM mask = 00000001u;
-    int bit_pos = n & (sizeof(TELEM) * 8 - 1);
-    mask = mask << bit_pos;
+    int bit_pos = BitPos(n);
+    TELEM mask = GetMemMask(bit_pos);
     mask = ~mask;
     int mem_pos = GetMemIndex(n);
     pMem[mem_pos] = pMem[mem_pos] & mask;
@@ -103,10 +100,9 @@ int TBitField::GetBit(const int n) const // получить значение б
 {
     if (n < 0) throw invalid_argument("you can not get negative bit");
     if (n >= BitLen) throw invalid_argument("you can not get to much index");
-    TELEM mask = 00000001u;
-    int bit_pos = n & (sizeof(TELEM) * 8 - 1);
+    int bit_pos = BitPos(n);
+    TELEM mask = GetMemMask(bit_pos);
     int mem_pos = GetMemIndex(n);
-    mask = mask << bit_pos;
     return pMem[mem_pos] & mask;
 }
 
@@ -165,7 +161,7 @@ int TBitField::operator==(const TBitField& bf) const // сравнение
 
 int TBitField::operator!=(const TBitField& bf) const // сравнение
 {
-    return ~(*this == bf);
+    return !(*this == bf);
 }
 
 TBitField TBitField::operator|(const TBitField& bf) // операция "или"
